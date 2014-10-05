@@ -52,6 +52,9 @@ class Billing extends CI_Controller
         $this->load->model('UnitTypeModel');
         $this->load->model('ConsigneeModel');
         $page = "addBillItems";
+
+        $this->addBillItemsSubmitHandle($invoiceId);
+
         $this->data['invoiceDetails'] = $this->InvoiceModel->getInvoiceDetails($invoiceId);
         $this->data['invoiceTypes'] = $this->InvoiceTypeModel->getAllInvoiceTypesAsAssocArray();
         $this->data['taxTypes'] = $this->TaxTypeModel->getAllTaxTypes();
@@ -59,9 +62,43 @@ class Billing extends CI_Controller
         $this->data['consigneeDetails'] = $this->ConsigneeModel->getConsigneeDetails($this->data['invoiceDetails']->invoice_consignee);
         $this->data['invoiceItems'] = $this->InvoiceModel->getInvoiceItems($invoiceId);
 
-        $this->addBillItemsSubmitHandle($invoiceId);
-
         $this->index($page, "Add invoice items");
+    }
+
+    public function addAccessoryItems($invoiceId)
+    {
+
+    }
+
+    public function billPdf($invoiceId)
+    {
+        require(dirname(__FILE__) . "/../assets/fpdf17/BillTemplate.php");
+        $this->load->model('InvoiceModel');
+        $this->load->model('InvoiceTypeModel');
+        $this->load->model('TaxTypeModel');
+        $this->load->model('UnitTypeModel');
+        $this->load->model('ConsigneeModel');
+
+        $invoiceDetails = $this->InvoiceModel->getInvoiceDetails($invoiceId);
+        $invoiceTypeDetails = $this->InvoiceTypeModel->getInvoiceTypedetails($invoiceDetails->invoice_type);
+        $taxTypes = $this->TaxTypeModel->getAllTaxTypes();
+        $unitTypes = $this->UnitTypeModel->getAllUnitTypes();
+        $consigneeDetails = $this->ConsigneeModel->getConsigneeDetails($invoiceDetails->invoice_consignee);
+        $invoiceItems = $this->InvoiceModel->getInvoiceItems($invoiceId);
+
+        $bill = new Bill();
+        $bill->billType = $invoiceTypeDetails->invoice_type_name;
+        $bill->billDate = $invoiceDetails->invoice_date;
+        $bill->billInvoiceNo = "{$invoiceTypeDetails->invoice_type_initial}-{$invoiceDetails->invoice_no}";
+        $bill->billBookNo = $invoiceDetails->invoice_book_no;
+        $bill->billTo = "$consigneeDetails->consignee_name
+$consigneeDetails->consignee_address_street
+$consigneeDetails->consignee_address_city ($consigneeDetails->consignee_address_state) PIN - $consigneeDetails->consignee_address_pincode";
+        $bill->billConsigneeTIN = $consigneeDetails->consignee_tin_no;
+        $bill->billAuthorisedContactPerson = $consigneeDetails->consignee_contact_person;
+        $bill->billAuthorisedMobileNo = $consigneeDetails->consignee_contact_mobile;
+
+        $bill->createPdf();
     }
 
     private function newBillSubmitHandle()
@@ -117,15 +154,15 @@ class Billing extends CI_Controller
         $this->load->model('InvoiceItemModel');
         $this->load->model('InvoiceModel');
         $this->load->library('form_validation');
-        $this->form_validation->set_rules('itemNames', 'Item description', 'required');
+        $this->form_validation->set_rules('item', 'Item description', 'required');
         if($this->form_validation->run())
         {
-            $itemNames = $this->input->post('itemNames');
-            $itemRates = $this->input->post('itemRates');
-            $itemUnitTypes = $this->input->post('itemUnits');
-            $itemQuantities = $this->input->post('itemQuantities');
-            $itemDiscounts = $this->input->post('itemDiscounts');
-            $itemTaxRates = $this->input->post('itemTaxRates');
+            $itemNames = $this->input->post('item');
+            $itemRates = $this->input->post('rate');
+            $itemUnitTypes = $this->input->post('unit');
+            $itemQuantities = $this->input->post('quantity');
+            $itemDiscounts = $this->input->post('discount');
+            $itemTaxRates = $this->input->post('tax');
 
             foreach($itemNames as $key=>$itemName)
             {

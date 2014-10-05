@@ -14,6 +14,13 @@ class InvoiceTypeModel extends CI_Model
         $this->load->database();
     }
 
+    public function getInvoiceTypeDetails($typeId)
+    {
+        $sql = "Select * From invoice_types Where invoice_type_id = ?";
+        $query = $this->db->query($sql, array($typeId));
+        return $query->row();
+    }
+
     public function getAllInvoiceTypes()
     {
         $sql = "Select * From invoice_types Where DIRTY=0";
