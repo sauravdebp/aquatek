@@ -77,7 +77,12 @@ class InvoiceModel extends CI_Model
 
     public function getAccessoryItems($invoiceId)
     {
-
+        $sql = "Select accessory_items.*, quantity, unit_type, serial_no, remarks
+                From invoice_accessoryitem_map
+                  Join accessory_items On invoice_accessoryitem_map.accessory_item_id = accessory_items.accessory_id
+                Where invoice_id = ? And invoice_accessoryitem_map.DIRTY = 0";
+        $query = $this->db->query($sql, array($invoiceId));
+        return $query->result();
     }
 
     private function assignInvoiceNo($invoiceTypeId)

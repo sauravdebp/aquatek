@@ -192,7 +192,7 @@
     </div>
     <form role="form" class="form_hidden" method="post" action="#">
         <div class="row col-md-12">
-            <a href="#" class="btn center-block">Add accessory items</a>
+            <a href="/<?php echo BASEURL; ?>index.php/Billing/addAccessoryItems/<?php echo $invoiceDetails->invoice_id; ?>" class="btn center-block">Add accessory items</a>
         </div>
         <div class="row col-md-12">
             <input type="submit" value="Proceed" class="btn btn-default btn-lg center-block">

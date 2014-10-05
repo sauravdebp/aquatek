@@ -25,6 +25,17 @@ class UnitTypeModel extends CI_Model
         return $query->result();
     }
 
+    public function getAllUnitTypeNamesAsArray()
+    {
+        $types = $this->getAllUnitTypes();
+        $typeArr = array();
+        foreach($types as $type)
+        {
+            $typeArr[$type->unit_type_id] = $type->unit_type_name;
+        }
+        return $typeArr;
+    }
+
     public function getAllUnitTypesInclDirty()
     {
         $sql = "Select * From unit_types";

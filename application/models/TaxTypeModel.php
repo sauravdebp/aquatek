@@ -25,6 +25,17 @@ class TaxTypeModel extends CI_Model
         return $query->result();
     }
 
+    public function getAllTaxTypePercAsArray()
+    {
+        $types = $this->getAllTaxTypes();
+        $typeArr = array();
+        foreach($types as $type)
+        {
+            $typeArr[$type->tax_type_id] = $type->tax_perc;
+        }
+        return $typeArr;
+    }
+
     public function getAllTaxTypesInclDirty()
     {
         $sql = "Select * From tax_types";

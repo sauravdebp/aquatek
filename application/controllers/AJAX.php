@@ -69,12 +69,12 @@ class AJAX extends CI_Controller
     public function accessoryItemSuggestions()
     {
         $this->load->model('AccessoryItemModel');
-        $keyword = $this->input->post('keyword');
+        $keyword = $this->input->get('keyword');
         $result = $this->AccessoryItemModel->getMatchingAccessoryItems($keyword);
         $suggestions = array();
         foreach($result as $key=>$res)
         {
-            $suggestions[$key]['accessory_item_description'] = $res->accessory_item_description;
+            $suggestions[] = $res->accessory_item_description;
         }
         $json = json_encode($suggestions);
         echo $json;

@@ -14,6 +14,12 @@ class InvoiceItemModel extends CI_Model
         $this->load->database();
     }
 
+    public function addNewInvoiceItem($details = array())
+    {
+        $this->db->insert('invoice_items', $details);
+        return $this->db->trans_status();
+    }
+
     public function getMatchingInvoiceItems($desc)
     {
         //TODO: escape $desc
@@ -24,12 +30,6 @@ class InvoiceItemModel extends CI_Model
             return array();
         }
         return $query->result();
-    }
-
-    public function addNewInvoiceItem($details = array())
-    {
-        $this->db->insert('invoice_items', $details);
-        return $this->db->trans_status();
     }
 
     public function getInvoiceItemIdByDesc($itemDesc)
