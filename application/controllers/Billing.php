@@ -65,7 +65,7 @@ class Billing extends CI_Controller
         }
         else
         {
-            redirect('/Billing/billPdf/'.$invoiceId);
+            redirect('/Billing/addAccessoryItems/'.$invoiceId);
         }
         $this->index($page, "Add invoice items");
     }
@@ -74,6 +74,7 @@ class Billing extends CI_Controller
     {
         $page = "addAccessoryItems";
         $this->load->model('UnitTypeModel');
+        $this->load->helper('url');
 
         if(!$this->addAccessoryItemsSubmitHandle($invoiceId))
         {
@@ -82,7 +83,7 @@ class Billing extends CI_Controller
         }
         else
         {
-
+            redirect('/Billing/billPdf/'.$invoiceId);
         }
         $this->index($page);
     }
@@ -293,6 +294,7 @@ $consigneeDetails->consignee_address_city ($consigneeDetails->consignee_address_
         {
             return false;
         }
+        return true;
     }
 
     private function addConsignee()
