@@ -29,7 +29,22 @@
 
         <div class="form-group <?php if(form_error("invoiceType") != "") echo "has-error"; ?>">
             <label for="invoiceType">Invoice Type</label>
-            <select class="form-control" id="invoiceType" name="invoiceType">
+            <select class="form-control" id="invoiceType"
+                    <?php
+                    if(!isset($invoiceDetails))
+                    {
+                    ?>
+                    name="invoiceType"
+                    <?php
+                    }
+                    else
+                    {
+                    ?>
+                        disabled
+                    <?php
+                    }
+                    ?>
+                    >
                 <option value>Select Invoice Type</option>
                 <?php
                 foreach($invoiceTypes as $type)
