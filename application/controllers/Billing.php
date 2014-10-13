@@ -19,29 +19,49 @@ class Billing extends CI_Controller
     {
         $folder = "Billing/";
         $this->load->view("templates/header", array("pageTitle"=>$pageTitle));
+        $this->load->view("pages/" . $folder . "sidePanel", array("page"=>$page));
         $this->load->view("pages/" . $folder . $page, $this->data);
         $this->load->view("templates/footer");
     }
 
     public function newBill()
     {
+        unset($_SESSION['Billing']);
         $this->load->model('InvoiceTypeModel');
         $this->load->model('InvoiceModel');
         $this->load->helper('url');
         $page = "newBillForm";
-        $types = $this->InvoiceTypeModel->getAllInvoiceTypes();
-        $this->data['invoiceTypes'] = array();
-        foreach($types as $type)
-        {
-            $this->data['invoiceTypes'][$type->invoice_type_id] = $type->invoice_type_name;
-        }
+        $this->data['invoiceTypes'] = $this->InvoiceTypeModel->getAllInvoiceTypes();
         if(!($invoiceDetails = $this->newBillSubmitHandle()))
             $this->index($page, "New Bill");
         else
         {
             $invoiceId = $this->InvoiceModel->getInvoiceId($invoiceDetails['invoice_type'], $invoiceDetails['invoice_no']);
+            $_SESSION['Billing']['newBill']['invoiceId'] = $invoiceId;
             redirect('Billing/addBillItems/' . $invoiceId);
         }
+    }
+
+    public function editBill($invoiceId)
+    {
+        $_SESSION['Billing']['newBill']['invoiceId'] = $invoiceId;
+        $this->load->model('InvoiceTypeModel');
+        $this->load->model('InvoiceModel');
+        $this->load->model('ConsigneeModel');
+        $this->load->helper('url');
+        $page = "newBillForm";
+        if(!($this->editBillSubmitHandle($invoiceId)))
+        {
+//            $this->data['updateMessage'] = "Error updating invoice details";
+        }
+        else
+        {
+            $this->data['updateMessage'] = "Invoice Details updated";
+        }
+        $this->data['invoiceDetails'] = $this->InvoiceModel->getInvoiceDetails($invoiceId);
+        $this->data['consigneeDetails'] = $this->ConsigneeModel->getConsigneeDetails($this->data['invoiceDetails']->invoice_consignee);
+        $this->data['invoiceTypes'] = $this->InvoiceTypeModel->getAllInvoiceTypes();
+        $this->index($page, "Edit Bill");
     }
 
     public function addBillItems($invoiceId)
@@ -65,6 +85,7 @@ class Billing extends CI_Controller
         }
         else
         {
+            $_SESSION['Billing']['addBillItems']['itemsAdded'] = true;
             redirect('/Billing/addAccessoryItems/'.$invoiceId);
         }
         $this->index($page, "Add invoice items");
@@ -83,9 +104,10 @@ class Billing extends CI_Controller
         }
         else
         {
+            $_SESSION['Billing']['addAccessoryItems']['accessoryItemsAdded'] = true;
             redirect('/Billing/billPdf/'.$invoiceId);
         }
-        $this->index($page);
+        $this->index($page, "Add Accessory Items");
     }
 
     public function billPdf($invoiceId)
@@ -142,7 +164,7 @@ class Billing extends CI_Controller
         $bill->billFreight = $invoiceDetails->invoice_freight_charge;
         $bill->billReceived = $invoiceDetails->invoice_received_amount;
         $bill->billGrandTotal += $bill->billFreight;
-        $bill->billBalance = $bill->billGrandTotal - $bill->billBalance;
+        $bill->billBalance = $bill->billGrandTotal - $invoiceDetails->invoice_received_amount;
         $bill->billVehicleNo = $invoiceDetails->invoice_vehicle_no;
         $bill->billGrBillTno = $invoiceDetails->invoice_gr_bill_tno;
         $bill->billRoadPermitNo = $invoiceDetails->invoice_road_permit_no;
@@ -176,6 +198,10 @@ $consigneeDetails->consignee_address_city ($consigneeDetails->consignee_address_
         $this->form_validation->set_rules('invoiceConsigneeAddressCity','City','required');
         $this->form_validation->set_rules('invoiceConsigneeAddressState','State','required');
         $this->form_validation->set_rules('invoiceConsigneeAddressPincode','Pincode','required');
+        $this->form_validation->set_rules('invoiceVehicleNo','Vehicle No.','required');
+        $this->form_validation->set_rules('invoiceGrBillTno','Gr/Bill Tno','required');
+        $this->form_validation->set_rules('invoiceRoadPermitNo','Road Permit No','required');
+        $this->form_validation->set_rules('invoiceFreightCharge','Pincode','required');
 
         if($this->form_validation->run())
         {
@@ -209,6 +235,45 @@ $consigneeDetails->consignee_address_city ($consigneeDetails->consignee_address_
         return $invoiceDetails;
     }
 
+    private function editBillSubmitHandle($invoiceId)
+    {
+        $this->load->model('InvoiceModel');
+        $this->load->model('ConsigneeModel');
+        $this->load->library('form_validation');
+
+        $this->form_validation->set_rules('detailsUpdated', 'Details Not Updated', 'required');
+        if($this->form_validation->run())
+        {
+            if($this->ConsigneeModel->getConsigneeDetails($this->input->post('invoiceConsigneeTIN')) == null)
+            {
+                $this->addConsignee();
+            }
+            else
+            {
+                //TODO: validate TIN No. with provided details
+            }
+            $invoiceDetails = array(
+                "invoice_type" => $this->input->post('invoiceType'),
+                "invoice_date" => $this->input->post('invoiceDate'),
+                "invoice_consignee" => $this->input->post('invoiceConsigneeTIN')
+            );
+            if($this->input->post('invoiceFreightCharge') != "")
+                $invoiceDetails['invoice_freight_charge'] = $this->input->post('invoiceFreightCharge');
+            if($this->input->post('invoiceGrBillTno') != "")
+                $invoiceDetails['invoice_gr_bill_tno'] = $this->input->post('invoiceGrBillTno');
+            if($this->input->post('invoiceRoadPermitNo') != "")
+                $invoiceDetails['invoice_road_permit_no'] = $this->input->post('invoiceRoadPermitNo');
+            if($this->input->post('invoiceVehicleNo') != "")
+                $invoiceDetails['invoice_vehicle_no'] = $this->input->post('invoiceVehicleNo');
+            $this->InvoiceModel->updateInvoiceDetails($invoiceId, $invoiceDetails);
+        }
+        else
+        {
+            return false;
+        }
+        return true;
+    }
+
     private function addBillItemsSubmitHandle($invoiceId)
     {
         $this->load->model('InvoiceItemModel');
@@ -223,6 +288,7 @@ $consigneeDetails->consignee_address_city ($consigneeDetails->consignee_address_
             $itemQuantities = $this->input->post('quantity');
             $itemDiscounts = $this->input->post('discount');
             $itemTaxRates = $this->input->post('tax');
+            $invoiceReceivedAmount = $this->input->post('invoiceReceivedAmount');
 
             foreach($itemNames as $key=>$itemName)
             {
@@ -245,6 +311,7 @@ $consigneeDetails->consignee_address_city ($consigneeDetails->consignee_address_
                 if($itemDiscounts[$key] != "")
                     $invoiceItemDetails['discount_perc'] = $itemDiscounts[$key];
                 $this->InvoiceModel->addInvoiceItem($invoiceId, $itemId, $invoiceItemDetails);
+                $this->InvoiceModel->updateReceivedAmount($invoiceId, $invoiceReceivedAmount);
             }
         }
         else

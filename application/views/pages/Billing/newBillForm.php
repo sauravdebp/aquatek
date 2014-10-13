@@ -7,129 +7,220 @@
  */
 ?>
 
-<div class="container">
-    <center><h1>Create new Invoice</h1></center>
-    <br><br>
-    <form role="form" class="form-horizontal" method="post">
-        <div class="form-group">
-            <div class="col-sm-4"></div>
-            <div class="col-sm-4">
-                <?php echo validation_errors(); ?>
-            </div>
+<div class="col-md-10">
+    <!--<center><h1>Create new Invoice</h1></center>
+    <br><br>-->
+    <div class="col-md-4"></div>
+    <form role="form" class="col-md-4" method="post">
+        <div class="form-group row" style="color: #ac2925; font-size: .9em;">
+            <?php
+                if(validation_errors())
+                {
+                    echo validation_errors('<div class="row col-sm-12">', '</div>');
+                }
+                if(isset($updateMessage))
+                {
+                ?>
+                    <div class="alert alert-success" role="alert"><?php echo $updateMessage; ?></div>
+                <?php
+                }
+                ?>
         </div>
+
         <div class="form-group <?php if(form_error("invoiceType") != "") echo "has-error"; ?>">
-            <label for="invoiceType" class="col-sm-4 control-label">Invoice Type</label>
-            <div class="col-sm-4">
-                <select class="form-control" id="invoiceType" name="invoiceType" value="<?php echo set_value("invoiceType"); ?>">
-                    <option value>Select Invoice Type</option>
-                    <?php
-                    foreach($invoiceTypes as $id=>$type)
-                    {
-                    ?>
-                    <option value="<?php echo $id; ?>"><?php echo $type; ?></option>
-                    <?php
-                    }
-                    ?>
-                </select>
-            </div>
+            <label for="invoiceType">Invoice Type</label>
+            <select class="form-control" id="invoiceType" name="invoiceType">
+                <option value>Select Invoice Type</option>
+                <?php
+                foreach($invoiceTypes as $type)
+                {
+                ?>
+                <option value="<?php echo $type->invoice_type_id; ?>"
+                        <?php
+                        if(set_value("invoiceType") == $type->invoice_type_id || (isset($invoiceDetails) && $invoiceDetails->invoice_type == $type->invoice_type_id))
+                            echo "selected";
+                        ?>>
+                    <?php echo $type->invoice_type_name; ?>
+                </option>
+                <?php
+                }
+                ?>
+            </select>
         </div>
 
-        <div class="form-group <?php if(form_error("invoiceDate") != "") echo "has-error"; ?>">
-            <label for="invoiceDate" class="col-sm-4 control-label">Invoice Date</label>
-            <div class="col-sm-4">
-                <input class="form-control" type="date" id="invoiceDate" name="invoiceDate" value="<?php echo set_value("invoiceDate"); ?>">
-            </div>
+        <div class="form-group <?php if(form_error("invoiceDate")) echo "has-error"; ?>">
+            <label for="invoiceDate">Invoice Date</label>
+            <input class="form-control" type="date" id="invoiceDate" name="invoiceDate"
+                   value=
+                   "<?php
+                    if(set_value("invoiceDate"))
+                        echo set_value("invoiceDate");
+                    else if(isset($invoiceDetails))
+                        echo $invoiceDetails->invoice_date;
+                   ?>">
         </div>
 
-        <div class="form-group <?php if(form_error("invoiceConsigneeName") != "") echo "has-error"; ?>">
-            <label for="invoiceConsigneeName" class="col-sm-4 control-label">Company Name</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control typeahead" id="invoiceConsigneeName" name="invoiceConsigneeName" placeholder="Company Name" value="<?php echo set_value("invoiceConsigneeName"); ?>">
+        <div class="form-group <?php if(form_error("invoiceConsigneeName")) echo "has-error"; ?>">
+            <div>
+                <label for="invoiceConsigneeName">Company Name</label>
             </div>
+            <input type="text" class="form-control typeahead" id="invoiceConsigneeName" name="invoiceConsigneeName" placeholder="Company Name"
+                   value=
+                   "<?php
+                    if(set_value("invoiceConsigneeName"))
+                        echo set_value("invoiceConsigneeName");
+                    else if(isset($consigneeDetails))
+                        echo $consigneeDetails->consignee_name;
+                   ?>">
         </div>
 
-        <div class="form-group <?php if(form_error("invoiceConsigneeTIN") != "") echo "has-error"; ?>">
-            <label for="invoiceConsigneeTIN" class="col-sm-4 control-label">Consignee TIN No.</label>
-            <div class="col-sm-4">
-                <input  type="text" class="form-control typeahead" id="invoiceConsigneeTIN" name="invoiceConsigneeTIN" placeholder="Consignee TIN No." value="<?php echo set_value("invoiceConsigneeTIN"); ?>">
+        <div class="form-group <?php if(form_error("invoiceConsigneeTIN")) echo "has-error"; ?>">
+            <div>
+                <label for="invoiceConsigneeTIN">Consignee TIN No.</label>
             </div>
+            <input type="text" class="form-control typeahead" id="invoiceConsigneeTIN" name="invoiceConsigneeTIN" placeholder="Consignee TIN No."
+                   value=
+                   "<?php
+                    if(set_value("invoiceConsigneeTIN"))
+                        echo set_value("invoiceConsigneeTIN");
+                    else if(isset($consigneeDetails))
+                        echo $consigneeDetails->consignee_tin_no;
+                   ?>">
         </div>
 
-        <div class="form-group <?php if(form_error("invoiceConsigneeContactPerson") != "") echo "has-error"; ?>">
-            <label for="invoiceConsigneeContactPerson" class="col-sm-4 control-label">Authorised Contact Person</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" id="invoiceConsigneeContactPerson" name="invoiceConsigneeContactPerson" placeholder="Contact Person" value="<?php echo set_value("invoiceConsigneeContactPerson"); ?>">
-            </div>
+        <div class="form-group <?php if(form_error("invoiceConsigneeContactPerson")) echo "has-error"; ?>">
+            <label for="invoiceConsigneeContactPerson">Authorised Contact Person</label>
+            <input type="text" class="form-control" id="invoiceConsigneeContactPerson" name="invoiceConsigneeContactPerson" placeholder="Contact Person"
+                   value=
+                   "<?php
+                    if(set_value("invoiceConsigneeContactPerson"))
+                        echo set_value("invoiceConsigneeContactPerson");
+                   else if(isset($consigneeDetails))
+                        echo $consigneeDetails->consignee_contact_person;
+                   ?>">
         </div>
 
-        <div class="form-group <?php if(form_error("invoiceConsigneeContactPersonMobile") != "") echo "has-error"; ?>">
-            <label for="invoiceConsigneeContactPersonMobile" class="col-sm-4 control-label">Consignee Authorised Tel/Mobile No.</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" id="invoiceConsigneeContactPersonMobile" name="invoiceConsigneeContactPersonMobile" placeholder="Contact Number" value="<?php echo set_value("invoiceConsigneeContactPersonMobile"); ?>">
-            </div>
+        <div class="form-group <?php if(form_error("invoiceConsigneeContactPersonMobile")) echo "has-error"; ?>">
+            <label for="invoiceConsigneeContactPersonMobile">Consignee Authorised Tel/Mobile No.</label>
+            <input type="text" class="form-control" id="invoiceConsigneeContactPersonMobile" name="invoiceConsigneeContactPersonMobile" placeholder="Contact Number"
+                   value=
+                   "<?php
+                    if(set_value("invoiceConsigneeContactPersonMobile"))
+                        echo set_value("invoiceConsigneeContactPersonMobile");
+                   else if(isset($consigneeDetails))
+                        echo $consigneeDetails->consignee_contact_mobile;
+                   ?>">
         </div>
 
-        <div class="form-group">
-            <label for="invoiceConsigneeAddress" class="col-sm-4 control-label">Bill To</label>
-            <div class="col-sm-4">
-                <div class="form-group <?php if(form_error("invoiceConsigneeAddressStreet") != "") echo "has-error"; ?>">
-                    <label for="invoiceConsigneeAddressStreet" class="col-sm-0 control-label sr-only">Street Address</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" id="invoiceConsigneeAddressStreet" name="invoiceConsigneeAddressStreet" placeholder="Street Address" value="<?php echo set_value("invoiceConsigneeAddressStreet"); ?>">
-                    </div>
+        <div class="form-group <?php if(form_error("invoiceConsigneeAddressStreet") || form_error("invoiceConsigneeAddressCity") || form_error("invoiceConsigneeAddressState") || form_error("invoiceConsigneeAddressPincode")) echo "has-error"; ?>">
+            <label for="invoiceConsigneeAddress">Bill To</label>
+            <div>
+                <div class="form-group <?php if(form_error("invoiceConsigneeAddressStreet")) echo "has-error"; ?>">
+                    <label for="invoiceConsigneeAddressStreet" class="sr-only">Street Address</label>
+                    <input type="text" class="form-control" id="invoiceConsigneeAddressStreet" name="invoiceConsigneeAddressStreet" placeholder="Street Address"
+                           value=
+                           "<?php
+                            if(set_value("invoiceConsigneeAddressStreet"))
+                                echo set_value("invoiceConsigneeAddressStreet");
+                            else if(isset($consigneeDetails))
+                                echo $consigneeDetails->consignee_address_street;
+                           ?>">
                 </div>
-                <div class="form-group <?php if(form_error("invoiceConsigneeAddressCity") != "") echo "has-error"; ?>">
-                    <label for="invoiceConsigneeAddressCity" class="col-sm-0 control-label sr-only">City</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" id="invoiceConsigneeAddressCity" name="invoiceConsigneeAddressCity" placeholder="City" value="<?php echo set_value("invoiceConsigneeAddressCity"); ?>">
-                    </div>
+                <div class="form-group <?php if(form_error("invoiceConsigneeAddressCity")) echo "has-error"; ?>">
+                    <label for="invoiceConsigneeAddressCity" class="sr-only">City</label>
+                    <input type="text" class="form-control" id="invoiceConsigneeAddressCity" name="invoiceConsigneeAddressCity" placeholder="City"
+                           value=
+                           "<?php
+                           if(set_value("invoiceConsigneeAddressCity"))
+                               echo set_value("invoiceConsigneeAddressCity");
+                           else if(isset($consigneeDetails))
+                               echo $consigneeDetails->consignee_address_city;
+                           ?>">
                 </div>
-                <div class="form-group <?php if(form_error("invoiceConsigneeAddressState") != "") echo "has-error"; ?>">
-                    <label for="invoiceConsigneeAddressState" class="col-sm-0 control-label sr-only">State</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" id="invoiceConsigneeAddressState" name="invoiceConsigneeAddressState" placeholder="State" value="<?php echo set_value("invoiceConsigneeAddressState"); ?>">
-                    </div>
+                <div class="form-group <?php if(form_error("invoiceConsigneeAddressState")) echo "has-error"; ?>">
+                    <label for="invoiceConsigneeAddressState" class="sr-only">State</label>
+                    <input type="text" class="form-control" id="invoiceConsigneeAddressState" name="invoiceConsigneeAddressState" placeholder="State"
+                           value=
+                           "<?php
+                           if(set_value("invoiceConsigneeAddressState"))
+                               echo set_value("invoiceConsigneeAddressState");
+                           else if(isset($consigneeDetails))
+                               echo $consigneeDetails->consignee_address_state;
+                           ?>">
                 </div>
-                <div class="form-group <?php if(form_error("invoiceConsigneeAddressPincode") != "") echo "has-error"; ?>">
-                    <label for="invoiceConsigneeAddressPincode" class="col-sm-0 control-label sr-only">Pincode</label>
-                    <div class="col-sm-10">
-                        <input type="text" class="form-control" id="invoiceConsigneeAddressPincode" name="invoiceConsigneeAddressPincode" placeholder="Pincode" value="<?php echo set_value("invoiceConsigneeAddressPincode"); ?>">
-                    </div>
+                <div class="form-group <?php if(form_error("invoiceConsigneeAddressPincode")) echo "has-error"; ?>">
+                    <label for="invoiceConsigneeAddressPincode" class="sr-only">Pincode</label>
+                    <input type="text" class="form-control" id="invoiceConsigneeAddressPincode" name="invoiceConsigneeAddressPincode" placeholder="Pincode"
+                           value=
+                           "<?php
+                           if(set_value("invoiceConsigneeAddressPincode"))
+                               echo set_value("invoiceConsigneeAddressPincode");
+                           else if(isset($consigneeDetails))
+                               echo $consigneeDetails->consignee_address_pincode;
+                           ?>">
                 </div>
             </div>
         </div>
 
-        <div class="form-group">
-            <label for="invoiceVehicleNo" class="col-sm-4 control-label">Vehicle No.</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" id="invoiceVehicleNo" name="invoiceVehicleNo" placeholder="Vehicle No." value="<?php echo set_value("invoiceVehicleNo"); ?>">
-            </div>
+        <div class="form-group <?php if(form_error("invoiceVehicleNo")) echo "has-error"; ?>">
+            <label for="invoiceVehicleNo">Vehicle No.</label>
+            <input type="text" class="form-control" id="invoiceVehicleNo" name="invoiceVehicleNo" placeholder="Vehicle No."
+                   value=
+                   "<?php
+                   if(set_value("invoiceVehicleNo"))
+                       echo set_value("invoiceVehicleNo");
+                   else if(isset($invoiceDetails))
+                       echo $invoiceDetails->invoice_vehicle_no;
+                   ?>">
         </div>
 
-        <div class="form-group">
-            <label for="invoiceGrBillTno" class="col-sm-4 control-label">GR/Bill T No.</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" id="invoiceGrBillTno" name="invoiceGrBillTno" placeholder="GR/Bill T No." value="<?php echo set_value("invoiceGrBillTno"); ?>">
-            </div>
+        <div class="form-group <?php if(form_error("invoiceGrBillTno")) echo "has-error"; ?>">
+            <label for="invoiceGrBillTno">GR/Bill T No.</label>
+            <input type="text" class="form-control" id="invoiceGrBillTno" name="invoiceGrBillTno" placeholder="GR/Bill T No."
+                   value=
+                   "<?php
+                   if(set_value("invoiceGrBillTno"))
+                       echo set_value("invoiceGrBillTno");
+                   else if(isset($invoiceDetails))
+                       echo $invoiceDetails->invoice_gr_bill_tno;
+                   ?>">
         </div>
 
-        <div class="form-group">
-            <label for="invoiceRoadPermitNo" class="col-sm-4 control-label">Road Permit No.</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" id="invoiceRoadPermitNo" name="invoiceRoadPermitNo" placeholder="Road Permit No." value="<?php echo set_value("invoiceRoadPermitNo"); ?>">
-            </div>
+        <div class="form-group <?php if(form_error("invoiceRoadPermitNo")) echo "has-error"; ?>">
+            <label for="invoiceRoadPermitNo">Road Permit No.</label>
+            <input type="text" class="form-control" id="invoiceRoadPermitNo" name="invoiceRoadPermitNo" placeholder="Road Permit No."
+                   value=
+                   "<?php
+                   if(set_value("invoiceRoadPermitNo"))
+                       echo set_value("invoiceRoadPermitNo");
+                   else if(isset($invoiceDetails))
+                       echo $invoiceDetails->invoice_road_permit_no;
+                   ?>">
         </div>
 
-        <div class="form-group">
-            <label for="invoiceFreightCharge" class="col-sm-4 control-label">Freight Charge</label>
-            <div class="col-sm-4">
-                <input type="text" class="form-control" id="invoiceFreightCharge" name="invoiceFreightCharge" placeholder="Freight Charge" value="<?php echo set_value("invoiceFreightCharge"); ?>">
-            </div>
+        <div class="form-group <?php if(form_error("invoiceFreightCharge")) echo "has-error"; ?>">
+            <label for="invoiceFreightCharge">Freight Charge</label>
+            <input type="text" class="form-control" id="invoiceFreightCharge" name="invoiceFreightCharge" placeholder="Freight Charge"
+                   value=
+                   "<?php
+                   if(set_value("invoiceFreightCharge"))
+                       echo set_value("invoiceFreightCharge");
+                   else if(isset($invoiceDetails))
+                       echo $invoiceDetails->invoice_freight_charge;
+                   ?>">
         </div>
 
         <div class="form-group">
             <input type="submit" value="Proceed" class="btn btn-default btn-lg center-block">
         </div>
+        <?php
+        if(isset($invoiceDetails))
+        {
+        ?>
+            <input type="hidden" name="detailsUpdated" value="true">
+        <?php
+        }
+        ?>
     </form>
 </div>
 
@@ -174,7 +265,8 @@
         });
 
         $('#invoiceConsigneeName').bind('typeahead:selected', function(obj, datum, name) {
-            $.get("/<?php echo BASEURL; ?>index.php/AJAX/consigneeDetailsByName?consigneeName=" + $('#invoiceConsigneeName').val(), function(data, status) {
+            $.get("/<?php echo BASEURL; ?>index.php/AJAX/consigneeDetailsByName?consigneeName=" + $('#invoiceConsigneeName').val(), function(data, status)
+            {
                 //alert("Data: " + data + "\nStatus: " + status);
                 var details = JSON.parse(data);
                 $('#invoiceConsigneeContactPerson').val(details.consignee_contact_person);

@@ -42,6 +42,20 @@ class InvoiceModel extends CI_Model
         return $this->db->trans_status();
     }
 
+    public function updateInvoiceDetails($invoiceId, $details)
+    {
+        $this->db->update('invoice', $details, "invoice_id = $invoiceId");
+        return $this->db->trans_status();
+    }
+
+    public function updateReceivedAmount($invoiceId, $amount)
+    {
+        $details = array(
+            "invoice_received_amount" => $amount
+        );
+        $this->updateInvoiceDetails($invoiceId, $details);
+    }
+
     public function getInvoiceId($invoiceTypeId, $invoiceNo)
     {
         $sql = "Select invoice_id From invoice Where invoice_type = ? And invoice_no = ?";
@@ -82,6 +96,18 @@ class InvoiceModel extends CI_Model
                   Join accessory_items On invoice_accessoryitem_map.accessory_item_id = accessory_items.accessory_id
                 Where invoice_id = ? And invoice_accessoryitem_map.DIRTY = 0";
         $query = $this->db->query($sql, array($invoiceId));
+        return $query->result();
+    }
+
+    public function getAllInvoices($where="", $orderBy="")
+    {
+        $sql = "Select * From invoice Where DIRTY=0";
+        if($where != "")
+        {
+            $sql .= " AND $where";
+        }
+        $sql .= " $orderBy";
+        $query = $this->db->query($sql);
         return $query->result();
     }
 

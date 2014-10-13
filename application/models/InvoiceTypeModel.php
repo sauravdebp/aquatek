@@ -38,7 +38,8 @@ class InvoiceTypeModel extends CI_Model
         $invoiceTypes = array();
         foreach($types as $type)
         {
-            $invoiceTypes[$type->invoice_type_id] = $type->invoice_type_name;
+            $invoiceTypes[$type->invoice_type_id]['typeName'] = $type->invoice_type_name;
+            $invoiceTypes[$type->invoice_type_id]['typeInitial'] = $type->invoice_type_initial;
         }
         return $invoiceTypes;
     }

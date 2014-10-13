@@ -7,9 +7,9 @@
  */
 ?>
 
-<div class="container">
-    <center><h1>Add accessory items</h1></center>
-    <br><br>
+<div class="col-md-10">
+    <!--<center><h1>Add accessory items</h1></center>
+    <br><br>-->
     <div class="row col-md-12 center-block">
         <table class="table table-striped table-hover table_billItems">
             <tr>

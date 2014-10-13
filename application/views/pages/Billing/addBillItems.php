@@ -7,12 +7,12 @@
  */
 ?>
 
-<div class="container">
-    <center><h1>Add invoice items</h1></center>
-    <br><br>
+<div class="col-md-10">
+    <!--<center><h1>Add invoice items</h1></center>
+    <br><br>-->
     <div class="row">
         <div class="col-md-12 center-block bg-primary">
-            <center><h4><?php echo $invoiceTypes[$invoiceDetails->invoice_type]; ?> Invoice</h4></center>
+            <center><h4><?php echo $invoiceTypes[$invoiceDetails->invoice_type]['typeName']; ?> Invoice</h4></center>
         </div>
     </div>
     <div class="row bg-info">
@@ -179,12 +179,16 @@
                 <tr>
                     <td>Received</td>
                     <td>
-                        <input type="number" min="0" name="invoiceReceivedAmount" id="input_received" class="form-control">
+                        <input type="number" min="0" id="input_received" class="form-control" value="<?php echo $invoiceDetails->invoice_received_amount; ?>">
                     </td>
                 </tr>
                 <tr>
                     <td>Balance</td>
-                    <td id="txt_balance"></td>
+                    <td id="txt_balance">
+                        <?php
+                        echo ($totalAmount + $totalTax + $invoiceDetails->invoice_freight_charge) - $invoiceDetails->invoice_received_amount;
+                        ?>
+                    </td>
                 </tr>
             </table>
         </div>
@@ -194,6 +198,7 @@
         <div class="row col-md-12">
             <!--<a href="/<?php /*echo BASEURL; */?>index.php/Billing/addAccessoryItems/<?php /*echo $invoiceDetails->invoice_id; */?>" class="btn center-block">Add accessory items</a>-->
         </div>
+        <input type="hidden" id="input_receivedAmount" name="invoiceReceivedAmount" >
         <div class="row col-md-12">
             <input type="submit" value="Proceed" class="btn btn-default btn-lg center-block">
         </div>
@@ -221,6 +226,7 @@
                 balance = 0;
             else
                 balance = parseFloat(balance);
+            $('#input_receivedAmount').val($(this).val());
             $('#txt_balance').text(parseFloat($('#txt_grandTotal').text()) - parseFloat($('#input_received').val()));
         });
 

@@ -18,6 +18,7 @@
  * NOTE: If you change these, also change the error_reporting() code below
  *
  */
+    session_start();
 	define('ENVIRONMENT', 'development');
 
     define('HOST', 'localhost/');
